@@ -237,15 +237,14 @@ class ElementBinder {
   void _createDirectiveFactories(DirectiveRef ref, nodeModule, node, nodesAttrsDirectives, nodeAttrs,
                                  visibility) {
     if (ref.type == TextMustache) {
-      nodeModule.bind(TextMustache, toFactory: (Injector injector) {
-        return new TextMustache(node, ref.valueAST, injector.getByKey(SCOPE_KEY));
-      });
+      nodeModule.bind(TextMustache, toFactory: (Injector injector) => new TextMustache(
+              node, ref.valueAST, injector.getByKey(SCOPE_KEY), injector.getByKey(ELEMENT_PROBE_KEY)));
     } else if (ref.type == AttrMustache) {
       if (nodesAttrsDirectives.isEmpty) {
         nodeModule.bind(AttrMustache, toFactory: (Injector injector) {
           var scope = injector.getByKey(SCOPE_KEY);
           for (var ref in nodesAttrsDirectives) {
-            new AttrMustache(nodeAttrs, ref.value, ref.valueAST, scope);
+            new AttrMustache(nodeAttrs, ref.value, ref.valueAST, scope, injector.getByKey(ELEMENT_PROBE_KEY));
           }
         });
       }

@@ -5,7 +5,10 @@ part of angular.core.dom_internal;
 class TextMustache {
   final dom.Node _element;
 
-  TextMustache(this._element, AST ast, Scope scope) {
+  TextMustache(this._element, AST ast, Scope scope, ElementProbe probe) {
+    if (probe != null) {
+      probe.bindingExpressions.add(ast.expression);
+    }
     scope.watchAST(ast,
                 _updateMarkup,
                 canChangeModel: false);
@@ -26,9 +29,13 @@ class AttrMustache {
 
   // This Directive is special and does not go through injection.
   AttrMustache(this._attrs,
-                          String this._attrName,
-                          AST valueAST,
-                          Scope scope) {
+               String this._attrName,
+               AST valueAST,
+               Scope scope,
+               ElementProbe probe) {
+    if (probe != null) {
+      probe.bindingExpressions.add(valueAST.expression);
+    }
     _updateMarkup('', 'INITIAL-VALUE');
 
     _attrs.listenObserverChanges(_attrName, (hasObservers) {
