@@ -266,7 +266,6 @@ class ElementBinder {
       Directive annotation = ref.annotation;
       if (ref.annotation is Controller) {
         scope = nodeInjector.scope = scope.createChild(new PrototypeMap(scope.context));
-        scope.context['CTRL'] = true;
       }
       _createDirectiveFactories(ref, nodeInjector, node, nodeAttrs);
       if (ref.annotation.module != null) {
