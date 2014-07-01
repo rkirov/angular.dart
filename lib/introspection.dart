@@ -265,13 +265,14 @@ typedef List<String> _GetExpressionsFromProbe(ElementProbe probe);
  *   var testability = angular.element(document).injector().get('$testability');
  */
 class _Testability implements _JsObjectProxyable {
-  dom.Node node;
-  Injector injector;
+  final dom.Node node;
+  final ElementProbe probe;
 
-  _Testability(this.node, this.injector);
+  _Testability(this.node, this.probe);
+  _Testability.fromNode(dom.Node node): this(node, _findProbeInTree(node));
 
   notifyWhenNoOutstandingRequests(callback) {
-    injector.get(VmTurnZone).run(
+    probe.injector.get(VmTurnZone).run(
         () => new async.Timer(Duration.ZERO, callback));
   }
 
@@ -301,8 +302,7 @@ class _Testability implements _JsObjectProxyable {
     List<dom.Node> results = [];
     for (ElementProbe probe in probes) {
       for (String expression in getExpressions(probe)) {
-        int index = expression.indexOf(query);
-        if (index >= 0 && (index == 0 || exactMatch != true)) {
+        if(exactMatch == true ? expression == query : expression.indexOf(query) >= 0) {
           results.add(probe.element);
         }
       }
@@ -310,71 +310,31 @@ class _Testability implements _JsObjectProxyable {
     return results;
   }
 
-  js.JsObject _toJsObject() {
-    return _jsify({
-       'findBindings': (bindingString, [exactMatch]) =>
-           findBindings(bindingString, exactMatch),
-       'findModels': (modelExpressions, [exactMatch]) =>
-           findModels(modelExpressions, exactMatch),
-       'notifyWhenNoOutstandingRequests': (callback) =>
-           notifyWhenNoOutstandingRequests(() => callback.apply([])),
-    })..['_dart_'] = this;
-  }
-}
-
-
-class _TestabilityInjector implements _JsObjectProxyable {
-  Injector injector;
-  _Testability testability;
-  dom.Node node;
-
-  _TestabilityInjector(dom.Node this.node, Injector this.injector) {
-    testability=new _Testability(node, injector);
-  }
-
-  get(String what) {
-    if (what == r'$testability') {
-      return testability;
-    }
-    return null;
+  allowAnimations(bool allowed) {
+    Animate animate = probe.injector.get(Animate);
+    bool previous = animate.animationsAllowed;
+    animate.animationsAllowed = (allowed == true);
+    return previous;
   }
 
   js.JsObject _toJsObject() {
     return _jsify({
-      'get': (what) => get(what)._toJsObject(),
+        'allowAnimations': allowAnimations,
+        'findBindings': (bindingString, [exactMatch]) =>
+            findBindings(bindingString, exactMatch),
+        'findModels': (modelExpressions, [exactMatch]) =>
+            findModels(modelExpressions, exactMatch),
+        'notifyWhenNoOutstandingRequests': (callback) =>
+            notifyWhenNoOutstandingRequests(() => callback.apply([])),
+        'probe': () => _jsProbe(probe),
+        'scope': () => _jsScopeFromProbe(probe),
+        'eval': (expr) => probe.scope.eval(expr),
+        'query': (String selector, [String containsText]) =>
+            ngQuery(node, selector, containsText),
     })..['_dart_'] = this;
   }
 }
 
-
-_allowAnimations(bool enabled, [dom.Node node]) {
-  Injector injector = (node != null) ? ngInjector(node) : _findProbeInTree(dom.document).injector;
-  injector.get(Animate).animationsAllowed = (enabled == true);
-}
-
-
-class _TestabilityElement implements _JsObjectProxyable {
-  dom.Node node;
-  _TestabilityInjector testabilityInjector;
-  ElementProbe probe;
-
-  _TestabilityElement(this.node) {
-    probe = _findProbeInTree(node);
-    testabilityInjector = new _TestabilityInjector(node, probe.injector);
-  }
-
-  injector() => testabilityInjector;
-  scope() => probe.scope;
-
-  js.JsObject _toJsObject() {
-    return _jsify({
-      'injector': () => injector()._toJsObject(),
-      'probe': () => _jsProbe(probe),
-      'scope': () => _jsScopeFromProbe(probe),
-      'allowAnimations': (bool allowed) => _allowAnimations(allowed, node),
-    })..['_dart_'] = this;
-  }
-}
 
 
 void publishToJavaScript() {
@@ -386,8 +346,7 @@ void publishToJavaScript() {
       ngQuery(node, selector, containsText);
   D['angular'] = {
         'resumeBootstrap': ([arg]) {},
-        'allowAnimations': _allowAnimations,
-        'element': (node) => new _TestabilityElement(node)._toJsObject(),
+        'getTestability': (node) => new _Testability.fromNode(node)._toJsObject(),
   };
   js.JsObject J = _jsify(D);
   for (String key in D.keys) {
