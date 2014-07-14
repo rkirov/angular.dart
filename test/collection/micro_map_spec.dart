@@ -141,10 +141,10 @@ void main() {
       });
 
       it('should add to existing elements', () {
-        insert(map, 1, 18);
-        Map<int, String> other = <int, String>{19: '19', 20: '20'};
+        insert(map, 1, 6);
+        Map<int, String> other = <int, String>{7: '7', 8: '8'};
         map.addAll(other);
-        expect(map.length).toBe(20);
+        expect(map.length).toBe(8);
         expect(map.mode).toBe(MODE_ARRAY);
       });
 
