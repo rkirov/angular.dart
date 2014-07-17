@@ -87,9 +87,15 @@ class TaggingViewFactory implements ViewFactory {
     var elementInjector;
     if (binder == null) {
       elementInjector = parentInjector;
-    }  else {
-      elementInjector = binder.bind(view, scope, parentInjector, boundNode, eventHandler, animate);
+    } else {
       // TODO(misko): Remove this after we remove controllers. No controllers -> 1to1 Scope:View.
+      if (parentInjector != rootInjector && parentInjector.scope != null) {
+        scope = parentInjector.scope;
+      }
+      elementInjector = binder.bind(view, scope, parentInjector, boundNode, eventHandler, animate);
+    }
+    // TODO(misko): Remove this after we remove controllers. No controllers -> 1to1 Scope:View.
+    if (elementInjector != rootInjector && elementInjector.scope != null) {
       scope = elementInjector.scope;
     }
     elementInjectors[elementBinderIndex] = elementInjector;

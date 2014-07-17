@@ -87,6 +87,7 @@ void main() {
           ..bind(MyController)
           ..bind(MyParentController)
           ..bind(MyChildController)
+          ..bind(MyScopeModifyingController)
           ..bind(SameNameDecorator)
           ..bind(SameNameTransclude);
     });
@@ -916,6 +917,16 @@ void main() {
         expect(element.text).toContain('my data');
       });
 
+      it('should pass the right scope into inner mustache', (TestBed _) {
+        var element = _.compile('<div my-scope-modifying-controller>'
+        '  <div>{{ data }}</div>'
+        '</div>');
+
+        _.rootScope.apply();
+
+        expect(element.text).toContain('my data');
+      });
+
       it('should expose a ancestor controller to the scope of its children thru a undecorated element', (TestBed _) {
         var element = _.compile(
             '<div my-parent-controller>'
@@ -954,6 +965,13 @@ void main() {
   }));
 }
 
+@Controller(
+    selector: '[my-scope-modifying-controller]')
+class MyScopeModifyingController {
+  MyScopeModifyingController(Scope s) {
+    s.context['data'] = 'my data';
+  }
+}
 
 @Controller(
   selector: '[my-parent-controller]',
