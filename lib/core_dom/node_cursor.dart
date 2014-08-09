@@ -32,7 +32,14 @@ class NodeCursor {
   NodeCursor replaceWithAnchor(String name) {
     var element = current;
     var parent = element.parentNode;
-    var anchor = new dom.Comment('ANCHOR: $name');
+    var anchor = new dom.ScriptElement();
+    anchor.type = 'angular/anchor';
+    anchor.setAttribute('name', name);
+    if (element is dom.Element) {
+      (element as dom.Element).attributes.forEach(
+          (k, v) => anchor.setAttribute(k, v)
+      );
+    }
     if (parent != null) parent.insertBefore(anchor, element);
     element.remove();
     elements[index] = anchor;

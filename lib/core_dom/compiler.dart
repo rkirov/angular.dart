@@ -93,8 +93,7 @@ class Compiler implements Function {
           domCursor.ascend();
         }
       }
-    } else if (node.nodeType == dom.Node.TEXT_NODE ||
-               node.nodeType == dom.Node.COMMENT_NODE) {
+    } else if (node.nodeType == dom.Node.TEXT_NODE) {
       if (elementBinder != null &&
           elementBinder.hasDirectivesOrEvents &&
           directParentElementBinder != null) {
@@ -106,7 +105,7 @@ class Compiler implements Function {
             new TaggedElementBinder(elementBinder, parentElementBinderOffset, isTopLevel));
       }
     } else {
-      throw "Unsupported node type for $node: [${node.nodeType}]";
+      // throw "Unsupported node type for $node: [${node.nodeType}]";
     }
   }
 

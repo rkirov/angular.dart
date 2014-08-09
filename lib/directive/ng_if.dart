@@ -75,7 +75,7 @@ abstract class _NgUnlessIfAttrDirectiveBase {
 @Decorator(
     children: Directive.TRANSCLUDE_CHILDREN,
     selector:'[ng-if]',
-    map: const {'.': '=>condition'})
+    map: const {'ng-if': '=>condition'})
 class NgIf extends _NgUnlessIfAttrDirectiveBase {
   NgIf(ViewFactory viewFactory, ViewPort viewPort, Scope scope)
       : super(viewFactory, viewPort, scope);

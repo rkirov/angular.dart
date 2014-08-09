@@ -82,7 +82,7 @@ class ViewFactory implements Function {
       for (var k = 0; k < tagged.textBinders.length; k++) {
         TaggedTextBinder taggedText = tagged.textBinders[k];
         var childNode = boundNode.childNodes[taggedText.offsetIndex];
-        taggedText.binder.bind(view, scope, elementInjector, childNode, eventHandler, animate);
+        taggedText.binder.bindText(scope, childNode);
       }
     }
   }

@@ -201,7 +201,7 @@ class ElementBinder {
       }) : null;
 
       if (ref.mappings.isNotEmpty) {
-        if (nodeAttrs == null) nodeAttrs = new _AnchorAttrs(ref);
+        // if (nodeAttrs == null) nodeAttrs = new _AnchorAttrs(ref);
         _createAttrMappings(directive, scope, ref.mappings, nodeAttrs, tasks);
       }
 
@@ -223,6 +223,15 @@ class ElementBinder {
     }
   }
 
+  DirectiveInjector bindText(Scope scope, dom.Node node) {
+    var directiveRefs = _usableDirectiveRefs;
+    for(var i = 0; i < directiveRefs.length; i++) {
+      DirectiveRef ref = directiveRefs[i];
+      if (ref.typeKey != TEXT_MUSTACHE_KEY) print(ref.typeKey);
+      new TextMustache(node, ref.valueAST, scope);
+    }
+  }
+
   void _createDirectiveFactories(DirectiveRef ref, DirectiveInjector nodeInjector, node,
                                  nodeAttrs) {
     if (ref.typeKey == TEXT_MUSTACHE_KEY) {
@@ -238,6 +247,29 @@ class ElementBinder {
           boundComponentFactory.callArgs, ref.annotation.visibility);
     } else {
       nodeInjector.bindByKey(ref.typeKey, ref.factory, ref.paramKeys, ref.annotation.visibility);
+    }
+  }
+
+  _processBindAttrs(Node node, Scope scope) {
+    var jsNode;
+    List bindAssignableProps = [];
+    bindAttrs.forEach((String prop, AST ast) {
+      if (jsNode == null) jsNode = new js.JsObject.fromBrowserObject(node);
+      scope.watchAST(ast, (v, _) {
+        jsNode[prop] = v;
+      });
+
+      if (ast.parsedExp.isAssignable) {
+        bindAssignableProps.add([prop, ast.parsedExp]);
+      }
+    });
+
+    if (bindAssignableProps.isNotEmpty) {
+      node.addEventListener('change', (_) {
+        bindAssignableProps.forEach((propAndExp) {
+          propAndExp[1].assign(scope.context, jsNode[propAndExp[0]]);
+        });
+      });
     }
   }
 
@@ -283,26 +315,7 @@ class ElementBinder {
 
     _link(nodeInjector, scope, nodeAttrs);
 
-    var jsNode;
-    List bindAssignableProps = [];
-    bindAttrs.forEach((String prop, AST ast) {
-      if (jsNode == null) jsNode = new js.JsObject.fromBrowserObject(node);
-      scope.watchAST(ast, (v, _) {
-        jsNode[prop] = v;
-      });
-
-      if (ast.parsedExp.isAssignable) {
-        bindAssignableProps.add([prop, ast.parsedExp]);
-      }
-    });
-
-    if (bindAssignableProps.isNotEmpty) {
-      node.addEventListener('change', (_) {
-        bindAssignableProps.forEach((propAndExp) {
-          propAndExp[1].assign(scope.context, jsNode[propAndExp[0]]);
-        });
-      });
-    }
+    if (bindAttrs.isNotEmpty) _processBindAttrs(node, scope);
 
     if (onEvents.isNotEmpty) {
       onEvents.forEach((event, value) {
