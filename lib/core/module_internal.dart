@@ -27,6 +27,7 @@ import 'package:angular/core/parser/utils.dart';
 import 'package:angular/core/registry.dart';
 import 'package:angular/core/static_keys.dart';
 
+part "event_bus.dart";
 part "exception_handler.dart";
 part "interpolate.dart";
 part "scope.dart";

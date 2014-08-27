@@ -37,6 +37,7 @@ void main() {
         expect(injector.scope).toBe(scope);
         expect(injector.get(Injector)).toBe(appInjector);
         expect(injector.get(Scope)).toBe(scope);
+        expect(injector.get(EventBus)).toBe(scope);
         expect(injector.get(Node)).toBe(div);
         expect(injector.get(Element)).toBe(div);
         expect((injector.get(NodeAttrs) as NodeAttrs).element).toBe(div);

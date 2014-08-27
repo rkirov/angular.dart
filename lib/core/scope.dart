@@ -7,16 +7,8 @@ typedef EvalFunction1(context);
  * Injected into the listener function within [Scope.on] to provide event-specific details to the
  * scope listener.
  */
-class ScopeEvent {
+class ScopeEvent extends CustomEvent {
   static final String DESTROY = 'ng-destroy';
-
-  /**
-   * Data attached to the event. This would be the optional parameter from [Scope.emit] and
-   * [Scope.broadcast].
-   */
-  final data;
-
-  final String name;
 
   /// The origin scope that triggered the event (via [Scope.broadcast] or [Scope.emit]).
   final Scope targetScope;
@@ -29,30 +21,12 @@ class ScopeEvent {
   Scope get currentScope => _currentScope;
   Scope _currentScope;
 
-  /// true or false depending on if [stopPropagation] was executed.
-  bool get propagationStopped => _propagationStopped;
-  bool _propagationStopped = false;
-
-  /// true or false depending on if [preventDefault] was executed.
-  bool get defaultPrevented => _defaultPrevented;
-  bool _defaultPrevented = false;
-
   /**
    * [name]: The name of the scope event.
    * [targetScope]: The scope that triggers the event.
    * [data]: Arbitrary data attached to the event.
    */
-  ScopeEvent(this.name, this.targetScope, this.data);
-
-  /// Prevents the intercepted event from propagating further
-  void stopPropagation () {
-    _propagationStopped = true;
-  }
-
-  /// Sets the defaultPrevented flag to true.
-  void preventDefault() {
-    _defaultPrevented = true;
-  }
+  ScopeEvent(String name, this.targetScope, data) : super(name, data);
 }
 
 /**
@@ -145,7 +119,7 @@ abstract class ScopeAware {
  * [View]s are bound to each other. As scopes are created and destroyed by [ViewFactory] they are
  * responsible for change detection, change processing and memory management.
  */
-class Scope {
+class Scope implements EventBus {
   final String id;
   int _childScopeNextId = 0;
 

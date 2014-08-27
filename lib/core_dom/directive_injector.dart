@@ -50,7 +50,8 @@ const int SHADOW_ROOT_KEY_ID        = 15;
 const int CONTENT_PORT_KEY_ID       = 16;
 const int EVENT_HANDLER_KEY_ID      = 17;
 const int COMPONENT_DIRECTIVE_INJECTOR_KEY_ID = 18;
-const int KEEP_ME_LAST              = 19;
+const int EVENT_BUS_KEY_ID          = 19;
+const int KEEP_ME_LAST              = 20;
 
 EventHandler eventHandler(DirectiveInjector di) => di._eventHandler;
 
@@ -77,6 +78,7 @@ class DirectiveInjector implements DirectiveBinder {
     EVENT_HANDLER_KEY.uid      = EVENT_HANDLER_KEY_ID;
     ANIMATE_KEY.uid            = ANIMATE_KEY_ID;
     COMPONENT_DIRECTIVE_INJECTOR_KEY.uid = COMPONENT_DIRECTIVE_INJECTOR_KEY_ID;
+    EVENT_BUS_KEY.uid          = EVENT_BUS_KEY_ID;
     for(var i = 1; i < KEEP_ME_LAST; i++) {
       if (_KEYS[i].uid != i) throw 'MISSORDERED KEYS ARRAY: ${_KEYS} at $i';
     }
@@ -101,6 +103,7 @@ class DirectiveInjector implements DirectiveBinder {
       , CONTENT_PORT_KEY
       , EVENT_HANDLER_KEY
       , COMPONENT_DIRECTIVE_INJECTOR_KEY
+      , EVENT_BUS_KEY
       , KEEP_ME_LAST
       ];
   
@@ -285,6 +288,7 @@ class DirectiveInjector implements DirectiveBinder {
       case NODE_ATTRS_KEY_ID:         return _nodeAttrs;
       case ANIMATE_KEY_ID:            return _animate;
       case SCOPE_KEY_ID:              return scope;
+      case EVENT_BUS_KEY_ID:          return scope;
       case ELEMENT_PROBE_KEY_ID:      return elementProbe;
       case NG_ELEMENT_KEY_ID:         return ngElement;
       case EVENT_HANDLER_KEY_ID:      return _eventHandler;
